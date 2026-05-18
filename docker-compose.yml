@@ -176,31 +176,31 @@ services:
       backend:
         condition: service_started
 
-  viewshed-worker:
-    build:
-      context: ./viewshed-worker
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      SRTM_DIR: /data/srtm
-      WORKER_MODE: viewshed
-      NUM_WORKERS: '1'
-      COVERAGE_MODEL: ${COVERAGE_MODEL:-rf_radial_100m}
-      COVERAGE_MODEL_VERSION: ${COVERAGE_MODEL_VERSION:-5}
-    volumes:
-      - srtm_data:/data/srtm
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: '5g'
-    depends_on:
-      timescaledb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+  # viewshed-worker:
+  #   build:
+  #     context: ./viewshed-worker
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   environment:
+  #     DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
+  #     REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+  #     SRTM_DIR: /data/srtm
+  #     WORKER_MODE: viewshed
+  #     NUM_WORKERS: '1'
+  #     COVERAGE_MODEL: ${COVERAGE_MODEL:-rf_radial_100m}
+  #     COVERAGE_MODEL_VERSION: ${COVERAGE_MODEL_VERSION:-5}
+  #   volumes:
+  #     - srtm_data:/data/srtm
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1.5'
+  #         memory: '5g'
+  #   depends_on:
+  #     timescaledb:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
 
   link-worker:
     build:
