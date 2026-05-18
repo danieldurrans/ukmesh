@@ -1,8 +1,8 @@
-x-anubis-base: &anubis-base
-  image: ghcr.io/techarohq/anubis:v1.25.0
-  restart: unless-stopped
-  volumes:
-    - ./anubis/botPolicy.yaml:/data/botPolicy.yaml:ro
+# x-anubis-base: &anubis-base
+#   image: ghcr.io/techarohq/anubis:v1.25.0
+#   restart: unless-stopped
+#   volumes:
+#     - ./anubis/botPolicy.yaml:/data/botPolicy.yaml:ro
 
 services:
   timescaledb:
@@ -23,13 +23,13 @@ services:
       retries: 10
       start_period: 30s
 
-  mosquitto:
-    image: eclipse-mosquitto:2
-    restart: unless-stopped
-    volumes:
-      - ./mosquitto:/mosquitto/config
-      - mosquitto_data:/mosquitto/data
-      - mosquitto_log:/mosquitto/log
+#  mosquitto:
+#    image: eclipse-mosquitto:2
+#    restart: unless-stopped
+#    volumes:
+#      - ./mosquitto:/mosquitto/config
+#      - mosquitto_data:/mosquitto/data
+#      - mosquitto_log:/mosquitto/log
 
   redis:
     image: redis:7-alpine
@@ -73,8 +73,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      mosquitto:
-        condition: service_started
+#  #    mosquitto:
+#  #      condition: service_started
     ports:
       - "3000:3000"
     volumes:
@@ -82,21 +82,21 @@ services:
       - ./mosquitto:/mosquitto/config
       - /var/run/docker.sock:/var/run/docker.sock
 
-  acl-watcher:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    restart: unless-stopped
-    command: ["node", "dist/workers/acl-watcher.js"]
-    environment:
-      MOSQUITTO_ACL_PATH: /mosquitto/config/acl
-      MOSQUITTO_CONTAINER_NAME: mosquitto
-      NODE_ENV: production
-    depends_on:
-      - mosquitto
-    volumes:
-      - ./mosquitto:/mosquitto/config
-      - /var/run/docker.sock:/var/run/docker.sock
+#  acl-watcher:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.backend
+#    restart: unless-stopped
+#    command: ["node", "dist/workers/acl-watcher.js"]
+#    environment:
+#      MOSQUITTO_ACL_PATH: /mosquitto/config/acl
+#      MOSQUITTO_CONTAINER_NAME: mosquitto
+#      NODE_ENV: production
+#    depends_on:
+#      - mosquitto
+#    volumes:
+#      - ./mosquitto:/mosquitto/config
+#      - /var/run/docker.sock:/var/run/docker.sock
 
   path-learning-worker:
     build:
@@ -240,31 +240,31 @@ services:
       timescaledb:
         condition: service_healthy
 
-  website-teesside:
-    build:
-      context: ./teesside-site
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "3002:80"
-    depends_on:
-      - backend
+#  website-teesside:
+#    build:
+#      context: ./teesside-site
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    ports:
+#      - "3002:80"
+#    depends_on:
+#      - backend
 
-  app-ukmesh:
-    build:
-      context: .
-      dockerfile: Dockerfile.app
-      args:
-        VITE_APP_HOSTNAME: app.ukmesh.com
-        VITE_NETWORK: ukmesh
-        VITE_SITE: ukmesh
-    restart: unless-stopped
-    depends_on:
-      - backend
-    ports:
-      - "3003:80"
-    volumes:
-      - ${TERRAIN_TILES_PATH:-./terrain-tiles}:/terrain-tiles:ro
+#  app-ukmesh:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.app
+#      args:
+#        VITE_APP_HOSTNAME: app.ukmesh.com
+#        VITE_NETWORK: ukmesh
+#        VITE_SITE: ukmesh
+#    restart: unless-stopped
+#    depends_on:
+#      - backend
+#    ports:
+#      - "3003:80"
+#    volumes:
+#      - ${TERRAIN_TILES_PATH:-./terrain-tiles}:/terrain-tiles:ro
 
   website-ukmesh:
     build:
@@ -279,97 +279,97 @@ services:
     depends_on:
       - backend
 
-  mesh-health-check:
-    build:
-      context: .
-      dockerfile: Dockerfile.mesh-health-check
-      args:
-        MESH_HEALTH_CHECK_REF: ${HEALTHCHECK_SOURCE_REF:-main}
-    restart: unless-stopped
-    environment:
-      PORT: "3090"
-      APP_TITLE: ${HEALTHCHECK_APP_TITLE:-UKMesh Health Check}
-      APP_EYEBROW: ${HEALTHCHECK_APP_EYEBROW:-MeshCore Observer Coverage}
-      APP_HEADLINE: ${HEALTHCHECK_APP_HEADLINE:-Check your UK mesh reach.}
-      APP_DESCRIPTION: ${HEALTHCHECK_APP_DESCRIPTION:-Generate a test code, send it to the configured channel, and watch observer coverage build in real time.}
-      EXTERNAL_LINK_URL: ${HEALTHCHECK_EXTERNAL_LINK_URL:-https://ukmesh.com}
-      EXTERNAL_LINK_LABEL: ${HEALTHCHECK_EXTERNAL_LINK_LABEL:-UKMesh}
-      LOG_LEVEL: ${HEALTHCHECK_LOG_LEVEL:-info}
-      TRUST_PROXY: "1"
-      MQTT_HOST: mosquitto
-      MQTT_PORT: "9001"
-      MQTT_USERNAME: ${MQTT_USERNAME:-backend}
-      MQTT_PASSWORD: ${MQTT_PASSWORD}
-      MQTT_TOPIC: ${HEALTHCHECK_MQTT_TOPIC:-meshcore/+/+/packets,meshcore/+/+/status,meshcore/+/+/internal}
-      MQTT_TRANSPORT: websockets
-      MQTT_WS_PATH: /
-      MQTT_TLS: "false"
-      DASH_BROKER_HOST: ${HEALTHCHECK_DASH_BROKER_HOST:-mqtt.ukmesh.com}
-      TEST_CHANNEL_NAME: ${HEALTHCHECK_TEST_CHANNEL_NAME:-ukmeshtest}
-      TEST_CHANNEL_SECRET: ${HEALTHCHECK_TEST_CHANNEL_SECRET:-}
-      TEST_CHANNEL_SECRET_SOURCE_NAME: ${HEALTHCHECK_TEST_CHANNEL_SECRET_SOURCE_NAME:-test}
-      TEST_CHANNEL_HASH: ${HEALTHCHECK_TEST_CHANNEL_HASH:-}
-      MESHCORE_CHANNEL_SECRETS: ${MESHCORE_CHANNEL_SECRETS:-}
-      SESSION_TTL_SECONDS: ${HEALTHCHECK_SESSION_TTL_SECONDS:-600}
-      RESULT_RETENTION_SECONDS: ${HEALTHCHECK_RESULT_RETENTION_SECONDS:-604800}
-      MAX_USES_PER_CODE: ${HEALTHCHECK_MAX_USES_PER_CODE:-3}
-      KNOWN_OBSERVERS: ${HEALTHCHECK_KNOWN_OBSERVERS:-}
-      OBSERVER_ACTIVE_WINDOW_SECONDS: ${HEALTHCHECK_OBSERVER_ACTIVE_WINDOW_SECONDS:-900}
-      OBSERVER_RETENTION_SECONDS: ${HEALTHCHECK_OBSERVER_RETENTION_SECONDS:-14400}
-      OBSERVERS_FILE: /app/data/observer.json
-      RESULTS_FILE: /app/data/session-results.json
-      REGIONS_FILE: ${HEALTHCHECK_REGIONS_FILE:-regions/uk.geojson}
-      TURNSTILE_ENABLED: ${HEALTHCHECK_TURNSTILE_ENABLED:-false}
-      TURNSTILE_SITE_KEY: ${HEALTHCHECK_TURNSTILE_SITE_KEY:-}
-      TURNSTILE_SECRET_KEY: ${HEALTHCHECK_TURNSTILE_SECRET_KEY:-}
-    depends_on:
-      - mosquitto
-    ports:
-      - "3090:3090"
-    volumes:
-      - mesh_health_check_data:/app/data
-      - ./healthcheck-overrides/index.html:/app/public/index.html:ro
-      - ./healthcheck-overrides/share.html:/app/public/share.html:ro
-      - ./healthcheck-overrides/sw.js:/app/public/sw.js:ro
-      - ./healthcheck-overrides/ukmesh-theme.css:/app/public/ukmesh-theme.css:ro
+  # mesh-health-check:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.mesh-health-check
+  #     args:
+  #       MESH_HEALTH_CHECK_REF: ${HEALTHCHECK_SOURCE_REF:-main}
+  #   restart: unless-stopped
+  #   environment:
+  #     PORT: "3090"
+  #     APP_TITLE: ${HEALTHCHECK_APP_TITLE:-UKMesh Health Check}
+  #     APP_EYEBROW: ${HEALTHCHECK_APP_EYEBROW:-MeshCore Observer Coverage}
+  #     APP_HEADLINE: ${HEALTHCHECK_APP_HEADLINE:-Check your UK mesh reach.}
+  #     APP_DESCRIPTION: ${HEALTHCHECK_APP_DESCRIPTION:-Generate a test code, send it to the configured channel, and watch observer coverage build in real time.}
+  #     EXTERNAL_LINK_URL: ${HEALTHCHECK_EXTERNAL_LINK_URL:-https://ukmesh.com}
+  #     EXTERNAL_LINK_LABEL: ${HEALTHCHECK_EXTERNAL_LINK_LABEL:-UKMesh}
+  #     LOG_LEVEL: ${HEALTHCHECK_LOG_LEVEL:-info}
+  #     TRUST_PROXY: "1"
+  #     MQTT_HOST: mosquitto
+  #     MQTT_PORT: "9001"
+  #     MQTT_USERNAME: ${MQTT_USERNAME:-backend}
+  #     MQTT_PASSWORD: ${MQTT_PASSWORD}
+  #     MQTT_TOPIC: ${HEALTHCHECK_MQTT_TOPIC:-meshcore/+/+/packets,meshcore/+/+/status,meshcore/+/+/internal}
+  #     MQTT_TRANSPORT: websockets
+  #     MQTT_WS_PATH: /
+  #     MQTT_TLS: "false"
+  #     DASH_BROKER_HOST: ${HEALTHCHECK_DASH_BROKER_HOST:-mqtt.ukmesh.com}
+  #     TEST_CHANNEL_NAME: ${HEALTHCHECK_TEST_CHANNEL_NAME:-ukmeshtest}
+  #     TEST_CHANNEL_SECRET: ${HEALTHCHECK_TEST_CHANNEL_SECRET:-}
+  #     TEST_CHANNEL_SECRET_SOURCE_NAME: ${HEALTHCHECK_TEST_CHANNEL_SECRET_SOURCE_NAME:-test}
+  #     TEST_CHANNEL_HASH: ${HEALTHCHECK_TEST_CHANNEL_HASH:-}
+  #     MESHCORE_CHANNEL_SECRETS: ${MESHCORE_CHANNEL_SECRETS:-}
+  #     SESSION_TTL_SECONDS: ${HEALTHCHECK_SESSION_TTL_SECONDS:-600}
+  #     RESULT_RETENTION_SECONDS: ${HEALTHCHECK_RESULT_RETENTION_SECONDS:-604800}
+  #     MAX_USES_PER_CODE: ${HEALTHCHECK_MAX_USES_PER_CODE:-3}
+  #     KNOWN_OBSERVERS: ${HEALTHCHECK_KNOWN_OBSERVERS:-}
+  #     OBSERVER_ACTIVE_WINDOW_SECONDS: ${HEALTHCHECK_OBSERVER_ACTIVE_WINDOW_SECONDS:-900}
+  #     OBSERVER_RETENTION_SECONDS: ${HEALTHCHECK_OBSERVER_RETENTION_SECONDS:-14400}
+  #     OBSERVERS_FILE: /app/data/observer.json
+  #     RESULTS_FILE: /app/data/session-results.json
+  #     REGIONS_FILE: ${HEALTHCHECK_REGIONS_FILE:-regions/uk.geojson}
+  #     TURNSTILE_ENABLED: ${HEALTHCHECK_TURNSTILE_ENABLED:-false}
+  #     TURNSTILE_SITE_KEY: ${HEALTHCHECK_TURNSTILE_SITE_KEY:-}
+  #     TURNSTILE_SECRET_KEY: ${HEALTHCHECK_TURNSTILE_SECRET_KEY:-}
+  #   depends_on:
+  #     - mosquitto
+  #   ports:
+  #     - "3090:3090"
+  #   volumes:
+  #     - mesh_health_check_data:/app/data
+  #     - ./healthcheck-overrides/index.html:/app/public/index.html:ro
+  #     - ./healthcheck-overrides/share.html:/app/public/share.html:ro
+  #     - ./healthcheck-overrides/sw.js:/app/public/sw.js:ro
+  #     - ./healthcheck-overrides/ukmesh-theme.css:/app/public/ukmesh-theme.css:ro
 
-  app-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.app
-      args:
-        VITE_APP_HOSTNAME: ${VITE_DEV_APP_HOSTNAME:-}
-        VITE_NETWORK: test
-        VITE_SITE: dev
-        VITE_OBSERVER_ID: ${VITE_DEV_OBSERVER_ID:-}
-        VITE_SITE_DISPLAY_NAME: ${VITE_DEV_SITE_DISPLAY_NAME:-UK Mesh Test}
-        VITE_SITE_FOOTER_NAME: ${VITE_DEV_SITE_FOOTER_NAME:-UK Mesh Test}
-        VITE_SITE_APP_URL: ${VITE_DEV_SITE_APP_URL:-https://test.ukmesh.com}
-        VITE_SITE_HOME_URL: ${VITE_DEV_SITE_HOME_URL:-https://test.ukmesh.com}
-    restart: unless-stopped
-    depends_on:
-      - backend
-    ports:
-      - "3005:80"
+  # app-dev:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.app
+  #     args:
+  #       VITE_APP_HOSTNAME: ${VITE_DEV_APP_HOSTNAME:-}
+  #       VITE_NETWORK: test
+  #       VITE_SITE: dev
+  #       VITE_OBSERVER_ID: ${VITE_DEV_OBSERVER_ID:-}
+  #       VITE_SITE_DISPLAY_NAME: ${VITE_DEV_SITE_DISPLAY_NAME:-UK Mesh Test}
+  #       VITE_SITE_FOOTER_NAME: ${VITE_DEV_SITE_FOOTER_NAME:-UK Mesh Test}
+  #       VITE_SITE_APP_URL: ${VITE_DEV_SITE_APP_URL:-https://test.ukmesh.com}
+  #       VITE_SITE_HOME_URL: ${VITE_DEV_SITE_HOME_URL:-https://test.ukmesh.com}
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "3005:80"
 
-  website-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.website
-      args:
-        VITE_APP_HOSTNAME: ${VITE_DEV_APP_HOSTNAME:-app-dev.ukmesh.com}
-        VITE_NETWORK: test
-        VITE_SITE: dev
-        VITE_OBSERVER_ID: ${VITE_DEV_OBSERVER_ID:-}
-        VITE_SITE_DISPLAY_NAME: ${VITE_DEV_SITE_DISPLAY_NAME:-UK Mesh Test}
-        VITE_SITE_FOOTER_NAME: ${VITE_DEV_SITE_FOOTER_NAME:-UK Mesh Test}
-        VITE_SITE_APP_URL: ${VITE_DEV_SITE_APP_URL:-https://test.ukmesh.com}
-        VITE_SITE_HOME_URL: ${VITE_DEV_SITE_HOME_URL:-https://test.ukmesh.com}
-    restart: unless-stopped
-    ports:
-      - "3006:80"
-    depends_on:
-      - backend
+  # website-dev:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.website
+  #     args:
+  #       VITE_APP_HOSTNAME: ${VITE_DEV_APP_HOSTNAME:-app-dev.ukmesh.com}
+  #       VITE_NETWORK: test
+  #       VITE_SITE: dev
+  #       VITE_OBSERVER_ID: ${VITE_DEV_OBSERVER_ID:-}
+  #       VITE_SITE_DISPLAY_NAME: ${VITE_DEV_SITE_DISPLAY_NAME:-UK Mesh Test}
+  #       VITE_SITE_FOOTER_NAME: ${VITE_DEV_SITE_FOOTER_NAME:-UK Mesh Test}
+  #       VITE_SITE_APP_URL: ${VITE_DEV_SITE_APP_URL:-https://test.ukmesh.com}
+  #       VITE_SITE_HOME_URL: ${VITE_DEV_SITE_HOME_URL:-https://test.ukmesh.com}
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3006:80"
+  #   depends_on:
+  #     - backend
 
   # ── Anubis bot protection ─────────────────────────────────────────────────────
   # One sidecar per public HTTP service. Cloudflare Tunnel routes to these
@@ -377,93 +377,93 @@ services:
   # MQTT (mosquitto:9001) is intentionally excluded — non-browser clients.
   # Dev services are intentionally excluded — low value.
 
-  anubis-website-ukmesh:
-    <<: *anubis-base
-    environment:
-      ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
-      BIND: ":8923"
-      TARGET: "http://website-ukmesh:80"
-      COOKIE_DOMAIN: "ukmesh.com"
-      COOKIE_SECURE: "true"
-      COOKIE_SAME_SITE: "Lax"
-      COOKIE_EXPIRATION_TIME: "168h"
-      POLICY_FNAME: "/data/botPolicy.yaml"
-      SLOG_LEVEL: "INFO"
-      CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
-    depends_on:
-      - website-ukmesh
+  # anubis-website-ukmesh:
+  #   <<: *anubis-base
+  #   environment:
+  #     ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
+  #     BIND: ":8923"
+  #     TARGET: "http://website-ukmesh:80"
+  #     COOKIE_DOMAIN: "ukmesh.com"
+  #     COOKIE_SECURE: "true"
+  #     COOKIE_SAME_SITE: "Lax"
+  #     COOKIE_EXPIRATION_TIME: "168h"
+  #     POLICY_FNAME: "/data/botPolicy.yaml"
+  #     SLOG_LEVEL: "INFO"
+  #     CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
+  #   depends_on:
+  #     - website-ukmesh
 
-  anubis-app-ukmesh:
-    <<: *anubis-base
-    environment:
-      ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
-      BIND: ":8923"
-      TARGET: "http://app-ukmesh:80"
-      COOKIE_DOMAIN: "app.ukmesh.com"
-      COOKIE_SECURE: "true"
-      COOKIE_SAME_SITE: "Lax"
-      COOKIE_EXPIRATION_TIME: "168h"
-      POLICY_FNAME: "/data/botPolicy.yaml"
-      SLOG_LEVEL: "INFO"
-      CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
-    depends_on:
-      - app-ukmesh
+  # anubis-app-ukmesh:
+  #   <<: *anubis-base
+  #   environment:
+  #     ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
+  #     BIND: ":8923"
+  #     TARGET: "http://app-ukmesh:80"
+  #     COOKIE_DOMAIN: "app.ukmesh.com"
+  #     COOKIE_SECURE: "true"
+  #     COOKIE_SAME_SITE: "Lax"
+  #     COOKIE_EXPIRATION_TIME: "168h"
+  #     POLICY_FNAME: "/data/botPolicy.yaml"
+  #     SLOG_LEVEL: "INFO"
+  #     CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
+  #   depends_on:
+  #     - app-ukmesh
 
-  anubis-website-teesside:
-    <<: *anubis-base
-    environment:
-      ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
-      BIND: ":8923"
-      TARGET: "http://website-teesside:80"
-      COOKIE_DOMAIN: "teessidemesh.com"
-      COOKIE_SECURE: "true"
-      COOKIE_SAME_SITE: "Lax"
-      COOKIE_EXPIRATION_TIME: "168h"
-      POLICY_FNAME: "/data/botPolicy.yaml"
-      SLOG_LEVEL: "INFO"
-      CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
-    depends_on:
-      - website-teesside
+  # anubis-website-teesside:
+  #   <<: *anubis-base
+  #   environment:
+  #     ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
+  #     BIND: ":8923"
+  #     TARGET: "http://website-teesside:80"
+  #     COOKIE_DOMAIN: "teessidemesh.com"
+  #     COOKIE_SECURE: "true"
+  #     COOKIE_SAME_SITE: "Lax"
+  #     COOKIE_EXPIRATION_TIME: "168h"
+  #     POLICY_FNAME: "/data/botPolicy.yaml"
+  #     SLOG_LEVEL: "INFO"
+  #     CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
+  #   depends_on:
+  #     - website-teesside
 
-  anubis-health-check:
-    <<: *anubis-base
-    environment:
-      ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
-      BIND: ":8923"
-      TARGET: "http://mesh-health-check:3090"
-      COOKIE_DOMAIN: "healthcheck.ukmesh.com"
-      COOKIE_SECURE: "true"
-      COOKIE_SAME_SITE: "Lax"
-      COOKIE_EXPIRATION_TIME: "168h"
-      POLICY_FNAME: "/data/botPolicy.yaml"
-      SLOG_LEVEL: "INFO"
-      CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
-    depends_on:
-      - mesh-health-check
-    networks:
-      default:
-        # Cloudflare Tunnel currently routes healthcheck.ukmesh.com to
-        # http://anubis-mesh-health-check:8923. Keep this alias unless the
-        # tunnel ingress config is changed at Cloudflare too.
-        aliases:
-          - anubis-mesh-health-check
+  # anubis-health-check:
+  #   <<: *anubis-base
+  #   environment:
+  #     ED25519_PRIVATE_KEY_HEX: "${ANUBIS_ED25519_PRIVATE_KEY_HEX:?ANUBIS_ED25519_PRIVATE_KEY_HEX required}"
+  #     BIND: ":8923"
+  #     TARGET: "http://mesh-health-check:3090"
+  #     COOKIE_DOMAIN: "healthcheck.ukmesh.com"
+  #     COOKIE_SECURE: "true"
+  #     COOKIE_SAME_SITE: "Lax"
+  #     COOKIE_EXPIRATION_TIME: "168h"
+  #     POLICY_FNAME: "/data/botPolicy.yaml"
+  #     SLOG_LEVEL: "INFO"
+  #     CUSTOM_REAL_IP_HEADER: "CF-Connecting-IP"
+  #   depends_on:
+  #     - mesh-health-check
+  #   networks:
+  #     default:
+  #       # Cloudflare Tunnel currently routes healthcheck.ukmesh.com to
+  #       # http://anubis-mesh-health-check:8923. Keep this alias unless the
+  #       # tunnel ingress config is changed at Cloudflare too.
+  #       aliases:
+  #         - anubis-mesh-health-check
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel run
-    profiles: [tunnel]
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
-    depends_on:
-      - backend
-      - anubis-website-ukmesh
-      - anubis-app-ukmesh
-      - anubis-website-teesside
-      - anubis-health-check
-      - app-dev
-      - website-dev
-      - mosquitto
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   restart: unless-stopped
+  #   command: tunnel run
+  #   profiles: [tunnel]
+  #   environment:
+  #     TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - backend
+  #     - anubis-website-ukmesh
+  #     - anubis-app-ukmesh
+  #     - anubis-website-teesside
+  #     - anubis-health-check
+  #     - app-dev
+  #     - website-dev
+  #     - mosquitto
 
   loki:
     image: grafana/loki:3.4
