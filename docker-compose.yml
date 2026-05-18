@@ -266,18 +266,18 @@ services:
 #    volumes:
 #      - ${TERRAIN_TILES_PATH:-./terrain-tiles}:/terrain-tiles:ro
 
-  website-ukmesh:
-    build:
-      context: .
-      dockerfile: Dockerfile.website
-      args:
-        VITE_APP_HOSTNAME: app.ukmesh.com
-        VITE_SITE: ukmesh
-    restart: unless-stopped
-    ports:
-      - "3004:80"
-    depends_on:
-      - backend
+  # website-ukmesh:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.website
+  #     args:
+  #       VITE_APP_HOSTNAME: app.ukmesh.com
+  #       VITE_SITE: ukmesh
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3004:80"
+  #   depends_on:
+  #     - backend
 
   # mesh-health-check:
   #   build:
