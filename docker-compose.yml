@@ -42,45 +42,45 @@ services:
       timeout: 5s
       retries: 5
 
-#   backend:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile.backend
-#     restart: unless-stopped
-#     environment:
-#       DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
-#       MQTT_BROKER_URL: ${MQTT_BROKER_URL:-ws://mosquitto:9001}
-#       MQTT_USERNAME: ${MQTT_USERNAME:-backend}
-#       MQTT_PASSWORD: ${MQTT_PASSWORD}
-#       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-#       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET required}
-#       OPENTOPODATA_API: ${OPENTOPODATA_API:-https://api.opentopodata.org}
-#       PORT: ${PORT:-3000}
-#       MESHCORE_CHANNEL_SECRETS: ${MESHCORE_CHANNEL_SECRETS:-}
-#       OWNER_DATABASE_URL: ${OWNER_DATABASE_URL:-postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${OWNER_POSTGRES_DB:-meshcore_owner_auth}}
-#       OWNER_MQTT_USERNAME_MAP: ${OWNER_MQTT_USERNAME_MAP:-}
-#       OWNER_COOKIE_SECRET: ${OWNER_COOKIE_SECRET:-}
-#       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002,https://ukmesh.com,https://www.ukmesh.com,https://app.ukmesh.com,https://teessidemesh.com,https://www.teessidemesh.com,https://app.teessidemesh.com,https://test.ukmesh.com}
-#       RADIO_BOT_URL: ${RADIO_BOT_URL:-}
-#       COVERAGE_MODEL_VERSION: ${COVERAGE_MODEL_VERSION:-5}
-#       DATABASE_STATEMENT_TIMEOUT_MS: 300000
-#       DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-20}
-#       DATABASE_SKIP_SCHEMA_INIT: "true"
-#       WS_INITIAL_STATE_ENABLED: "1"
-#       NODE_ENV: production
-#     depends_on:
-#       timescaledb:
-#         condition: service_healthy
-#       redis:
-#         condition: service_healthy
-# #  #    mosquitto:
-# #  #      condition: service_started
-#     ports:
-#       - "3000:3000"
-#     volumes:
-#       - mosquitto_log:/mosquitto/log:ro
-#       - ./mosquitto:/mosquitto/config
-#       - /var/run/docker.sock:/var/run/docker.sock
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL:-ws://mosquitto:9001}
+      MQTT_USERNAME: ${MQTT_USERNAME:-backend}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET required}
+      OPENTOPODATA_API: ${OPENTOPODATA_API:-https://api.opentopodata.org}
+      PORT: ${PORT:-3000}
+      MESHCORE_CHANNEL_SECRETS: ${MESHCORE_CHANNEL_SECRETS:-}
+      OWNER_DATABASE_URL: ${OWNER_DATABASE_URL:-postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${OWNER_POSTGRES_DB:-meshcore_owner_auth}}
+      OWNER_MQTT_USERNAME_MAP: ${OWNER_MQTT_USERNAME_MAP:-}
+      OWNER_COOKIE_SECRET: ${OWNER_COOKIE_SECRET:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002,https://ukmesh.com,https://www.ukmesh.com,https://app.ukmesh.com,https://teessidemesh.com,https://www.teessidemesh.com,https://app.teessidemesh.com,https://test.ukmesh.com}
+      RADIO_BOT_URL: ${RADIO_BOT_URL:-}
+      COVERAGE_MODEL_VERSION: ${COVERAGE_MODEL_VERSION:-5}
+      DATABASE_STATEMENT_TIMEOUT_MS: 300000
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-20}
+      DATABASE_SKIP_SCHEMA_INIT: "true"
+      WS_INITIAL_STATE_ENABLED: "1"
+      NODE_ENV: production
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+#  #    mosquitto:
+#  #      condition: service_started
+    ports:
+      - "3001:3000"
+    volumes:
+      - mosquitto_log:/mosquitto/log:ro
+      - ./mosquitto:/mosquitto/config
+      - /var/run/docker.sock:/var/run/docker.sock
 
 #  acl-watcher:
 #    build:
