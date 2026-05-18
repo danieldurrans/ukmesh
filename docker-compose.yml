@@ -223,22 +223,22 @@ services:
       redis:
         condition: service_healthy
 
-  ml-path-learner:
-    build:
-      context: ./ml-path-learner
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    cpus: 2.0
-    mem_limit: '2g'
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
-      GOLD_EXTRACTION_INTERVAL_MINS: '15'
-      TRAINING_INTERVAL_MINS: '30'
-      MIN_GOLD_PATHS: '100'
-      CONFIDENCE_THRESHOLD: '0.85'
-    depends_on:
-      timescaledb:
-        condition: service_healthy
+  # ml-path-learner:
+  #   build:
+  #     context: ./ml-path-learner
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   cpus: 2.0
+  #   mem_limit: '2g'
+  #   environment:
+  #     DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
+  #     GOLD_EXTRACTION_INTERVAL_MINS: '15'
+  #     TRAINING_INTERVAL_MINS: '30'
+  #     MIN_GOLD_PATHS: '100'
+  #     CONFIDENCE_THRESHOLD: '0.85'
+  #   depends_on:
+  #     timescaledb:
+  #       condition: service_healthy
 
 #  website-teesside:
 #    build:
