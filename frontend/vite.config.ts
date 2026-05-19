@@ -8,8 +8,8 @@ export default defineConfig({
   plugins: [react(), viteSeoPlugin()],
   server: {
     proxy: {
-      '/api': 'http://localhost:3000',
-      '/ws': { target: 'ws://localhost:3000', ws: true },
+      '/api': 'http://backend:3000',
+      '/ws': { target: 'ws://backend:3000', ws: true },
     },
   },
   build: {
