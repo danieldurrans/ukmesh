@@ -3,7 +3,7 @@ FROM ghcr.io/osgeo/gdal:ubuntu-full-latest
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      python3-pip python3-venv python3-psycopg2 \
+      python3-pip python3-venv python3-psycopg2 libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Venv with system-site-packages so GDAL Python bindings + numpy are inherited
