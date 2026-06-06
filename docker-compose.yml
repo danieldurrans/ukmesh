@@ -7,6 +7,11 @@
 services:
   timescaledb:
     image: timescale/timescaledb:latest-pg16
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     command: ["postgres", "-c", "max_connections=300"]
     environment:
@@ -33,6 +38,11 @@ services:
 
   redis:
     image: redis:7-alpine
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     volumes:
       - redis_data:/data
@@ -46,6 +56,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
@@ -102,6 +117,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     command: ["node", "dist/workers/path-learning.js"]
     environment:
@@ -121,6 +141,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     command: ["node", "dist/workers/path-history.js"]
     environment:
@@ -140,6 +165,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     command: ["node", "dist/workers/health.js"]
     environment:
@@ -159,6 +189,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: "no"
     command: ["node", "dist/workers/link-backfill.js"]
     environment:
@@ -180,6 +215,11 @@ services:
     build:
       context: ./viewshed-worker
       dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-meshcore}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB:-meshcore}
@@ -206,6 +246,11 @@ services:
     build:
       context: ./viewshed-worker
       dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     cpus: 2.0
     environment:
@@ -273,6 +318,11 @@ services:
       args:
         VITE_APP_HOSTNAME: ${VITE_APP_HOSTNAME} # app.ukmesh.com
         VITE_SITE: ${VITE_SITE:-ukmesh}
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
     restart: unless-stopped
     ports:
       - "3004:80"
